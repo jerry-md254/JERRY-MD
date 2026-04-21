@@ -1,7 +1,7 @@
 {
-  "name": "JERRY-MD",
+  "name": "Jerry-md",
   "version": "9.0.0",
-  "description": "JERRY-MD WhatsApp bot created by JERRY KING",
+  "description": "JERRY-MD WhatsApp bot created by JERRY-XD Official",
   "main": "index.js",
   "scripts": {
     "start": "pm2 start index.js --deep-monitoring --attach --name JERRY-MD",

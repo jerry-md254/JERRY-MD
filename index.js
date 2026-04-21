@@ -38,7 +38,7 @@ function loadLocalFiles() {
     console.log(`🔌 Found ${pluginFiles.length} plugin files`);
   }
   
-  // Check for arslan.html
+  // Check for jerry.html
   if (fs.existsSync('./lib/jerry.html')) {
     console.log("✅ jerry.html found in lib folder");
   } else {
@@ -57,10 +57,10 @@ const messageStore = new Map();
 const groupSettings = new Map();
 
 // Default welcome message
-const DEFAULT_WELCOME = "╭──❍ *ᴡᴇʟᴄᴏᴍᴇ* ❍──╮\n│\n├─❍ *ᴜsᴇʀ:* @user\n├─❍ *ɢʀᴏᴜᴘ:* @group\n├─❍ *ᴍᴇᴍʙᴇʀs:* @count\n│\n╰──────────────────────❍\n\n> ᴇɴᴊᴏʏ ʏᴏᴜʀ sᴛᴀʏ! 🎉";
+const DEFAULT_WELCOME = "╭──❍ *WELCOME* ❍──╮\n│\n├─❍ *User:* @user\n├─❍ *Group:* @group\n├─❍ *Members:* @count\n│\n╰──────────────────────❍\n\n> Enjoy your stay! 🎉";
 
 // Default goodbye message
-const DEFAULT_GOODBYE = "╭──❍ *ɢᴏᴏᴅʙʏᴇ* ❍──╮\n│\n├─❍ *ᴜsᴇʀ:* @user\n├─❍ *ɢʀᴏᴜᴘ:* @group\n├─❍ *ʟᴇғᴛ ᴛʜᴇ ɢʀᴏᴜᴘ*\n│\n╰──────────────────────❍\n\n> ᴡᴇ ᴡɪʟʟ ᴍɪss ʏᴏᴜ! 👋";
+const DEFAULT_GOODBYE = "╭──❍ *GOODBYE* ❍──╮\n│\n├─❍ *User:* @user\n├─❍ *Group:* @group\n├─❍ *Left the group*\n│\n╰──────────────────────❍\n\n> We'll miss you! 👋";
 
 // Session handling
 const AUTH_DIR = path.join(__dirname, 'auth_info_baileys');
@@ -78,8 +78,8 @@ if (!fs.existsSync(CREDS)) {
     process.exit(1);
   }
   
-  const decoded = Buffer.from(session.substring(9), 'base64').toString('utf8');
-  try { JSON.parse(decoded); } catch(e) { console.log("❌ Invalid session data"); process.exit(1); }
+  const decoded = Buffer.from(session.substring(7), 'base64').toString('utf8');
+  JSON.parse(decoded);
   
   fs.mkdirSync(AUTH_DIR, { recursive: true });
   fs.writeFileSync(CREDS, decoded, { encoding: 'utf8' });
@@ -128,8 +128,7 @@ app.get('/', (req, res) => {
       <!DOCTYPE html>
       <html>
       <head>
-        <title>
-         Bot</title>
+        <title>JERRY-MD Bot</title>
         <style>
           body { font-family: Arial; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); text-align: center; padding: 50px; color: white; }
           .container { background: rgba(255,255,255,0.1); padding: 30px; border-radius: 10px; }
@@ -139,10 +138,10 @@ app.get('/', (req, res) => {
       </head>
       <body>
         <div class="container">
-          <h1>🤖 𝗝𝗘𝗥𝗥𝗬-𝗠𝗗</h1>
+          <h1>🤖 JERRY-MD</h1>
           <p class="status">✅ BOT IS CONNECTED</p>
           <p>Type .menu in WhatsApp to see commands</p>
-          <p>Owner: ${config.OWNER_NAME || '𝗝𝗘𝗥𝗥𝗬-𝗫𝗗'}</p>
+          <p>Owner: ${config.OWNER_NAME || 'JERRY KING'}</p>
         </div>
       </body>
       </html>
@@ -150,7 +149,7 @@ app.get('/', (req, res) => {
   }
 });
 
-app.get('/lib/arslan.html', (req, res) => {
+app.get('/lib/jerry.html', (req, res) => {
   res.redirect('/');
 });
 
@@ -162,7 +161,7 @@ async function getProfilePicture(sock, jid) {
     const ppUrl = await sock.profilePictureUrl(jid, 'image');
     return ppUrl;
   } catch {
-    return 'https://img.sanishtech.com/u/82c5beb887a5952725c5210e28cc6a87.png'; // Default image
+    return 'https://n.uguu.se/BlGoHUJU.jpg'; // Default image
   }
 }
 
@@ -243,14 +242,14 @@ async function connectToWA() {
       console.log(`✅ Plugins loaded: ${loadedCount}/${pluginFiles.length}`);
       
       // Send connection message with image
-      const aliveMsg = `*╭━━━━━━━━━━━━━●*\n> *ᴊᴇʀʀʏ-ᴍᴅ ᴄᴏɴɴᴇᴄᴛᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ*\n\n> *ᴛʏᴘᴇ ${prefix}ᴍᴇɴᴜ ᴛᴏ ᴠɪᴇᴡ ᴄᴏᴍᴍᴀɴᴅs*  \n\n*══❮𝐉𝐄𝐑𝐑𝐘-𝐌𝐃❯══*\n*│➤🤖 *ʙᴏᴛ ɴᴀᴍᴇ*: ${botConfig.BOT_NAME}*\n*│➤🛡️ *ᴏᴡɴᴇʀ*: ${config.OWNER_NAME}*\n*│➤♻ *ᴘʀᴇғɪx*: ${prefix}*\n*│➤🌍 *ᴍᴏᴅᴇ*: ${config.MODE}*\n*│➤⏰ Uptime: ${runtime(process.uptime())}*\n*╰━━━━━━━━━━━━●*\n\n> *ᴇɴᴊᴏʏ ᴜsɪɴɢ ᴊᴇʀʀʏ-ᴍᴅ*`;
+      const aliveMsg = `*╭──────────────●●►*\n> *JERRY-MD CONNECTED SUCCESSFULLY*\n\n> *Type ${prefix}menu to view commands*  \n\n*╭⊱✫ JERRY MD ✫⊱╮*\n*│✫📂 Bot Name: ${botConfig.BOT_NAME}*\n*│✫🛡️ Owner: ${config.OWNER_NAME}*\n*│✫♻️ Prefix: ${prefix}*\n*│✫🌍 Mode: ${config.MODE}*\n*│✫⏰ Uptime: ${runtime(process.uptime())}*\n*╰──────────────●●►*\n\n> Enjoy Using JERRY MD`;
       
       // Image URL for connection message
       const imageUrl = 'https://img.sanishtech.com/u/359a0de954640fca09ecbe9dbfd3ad80.png';
       
       try {
         // Send to owner with image
-        sock.sendMessage(ownerNumber[0] + '@s.whatsapp.net', {
+        sock.sendMessage(ownerNumber[0] + '22870437628@s.whatsapp.net', {
           image: { url: imageUrl },
           caption: aliveMsg
         }).catch(() => {
@@ -320,17 +319,15 @@ async function connectToWA() {
       };
       
       for (const participant of participants) {
-        // participant can be string or object depending on Baileys version
-        const participantStr = typeof participant === 'string' ? participant : (participant.id || participant.jid || String(participant));
-        const participantJid = participantStr.split('@')[0];
-        const pushName = participantStr.split('@')[0];
+        const participantJid = participant.split('@')[0];
+        const pushName = participant.split('@')[0];
         
         if (action === 'add') {
           // WELCOME MESSAGE - Only if enabled
           if (settings.welcome) {
             try {
               // Get user's profile picture
-              const ppUrl = await getProfilePicture(sock, participantStr);
+              const ppUrl = await getProfilePicture(sock, participant);
               
               // Format welcome message with variables
               let welcomeText = settings.welcomeMsg || DEFAULT_WELCOME;
@@ -344,12 +341,12 @@ async function connectToWA() {
               await sock.sendMessage(id, {
                 image: { url: ppUrl },
                 caption: welcomeText,
-                mentions: [participantStr]
+                mentions: [participant]
               }).catch(async () => {
                 // Fallback to text if image fails
                 await sock.sendMessage(id, {
                   text: welcomeText,
-                  mentions: [participantStr]
+                  mentions: [participant]
                 });
               });
               
@@ -364,7 +361,7 @@ async function connectToWA() {
           if (settings.goodbye) {
             try {
               // Get user's profile picture
-              const ppUrl = await getProfilePicture(sock, participantStr).catch(() => 'https://img.sanishtech.com/u/82c5beb887a5952725c5210e28cc6a87.png');
+              const ppUrl = await getProfilePicture(sock, participant).catch(() => 'https://img.sanishtech.com/u/82c5beb887a5952725c5210e28cc6a87.png');
               
               // Format goodbye message with variables
               let goodbyeText = settings.goodbyeMsg || DEFAULT_GOODBYE;
@@ -377,12 +374,12 @@ async function connectToWA() {
               await sock.sendMessage(id, {
                 image: { url: ppUrl },
                 caption: goodbyeText,
-                mentions: [participantStr]
+                mentions: [participant]
               }).catch(async () => {
                 // Fallback to text if image fails
                 await sock.sendMessage(id, {
                   text: goodbyeText,
-                  mentions: [participantStr]
+                  mentions: [participant]
                 });
               });
               
@@ -435,7 +432,7 @@ async function connectToWA() {
         // AUTO STATUS REPLY - Status uploader ko reply
         if (config.AUTO_STATUS_REPLY === 'true' && msg.key.participant) {
           try {
-            const statusReplyMsg = botConfig.STATUS_MSG || 'ᴛʜᴀɴᴋs ғᴏʀ sᴛᴀᴛᴜs ❤️';
+            const statusReplyMsg = botConfig.STATUS_MSG || 'Thanks for status! ❤️';
             await sock.sendMessage(msg.key.participant, {
               text: statusReplyMsg
             }).catch(() => {});
@@ -659,15 +656,15 @@ async function connectToWA() {
             return reply('❌ Only admins can use this command!');
           }
           
-          const settingsMsg = `╭──❍ *ᴡᴇʟᴄᴏᴍᴇ sᴇᴛᴛɪɴɢs* ❍──╮
+          const settingsMsg = `╭──❍ *WELCOME SETTINGS* ❍──╮
 │
-├─❍ *sᴛᴀᴛᴜs:* ${groupSetting.welcome ? '✅ ON' : '❌ OFF'}
-├─❍ *ɢᴏᴏᴅʙʏᴇ:* ${groupSetting.goodbye ? '✅ ON' : '❌ OFF'}
+├─❍ *Status:* ${groupSetting.welcome ? '✅ ON' : '❌ OFF'}
+├─❍ *Goodbye:* ${groupSetting.goodbye ? '✅ ON' : '❌ OFF'}
 │
-├─❍ *ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇ:*
+├─❍ *Welcome Message:*
 ├─❍ ${groupSetting.welcomeMsg.substring(0, 50)}...
 │
-├─❍ *ɢᴏᴏᴅʙʏᴇ ᴍᴇssᴀɢᴇ:*
+├─❍ *Goodbye Message:*
 ├─❍ ${groupSetting.goodbyeMsg.substring(0, 50)}...
 │
 ╰──────────────────────❍
@@ -792,7 +789,7 @@ Commands:
         const linkRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)|(chat\.whatsapp\.com\/[^\s]+)|(wa\.me\/[^\s]+)/gi;
         if (linkRegex.test(body)) {
           await sock.sendMessage(from, { delete: msg.key }).catch(() => {});
-          reply('⚠️ *ʟɪɴᴋs ᴀʀᴇ ɴᴏᴛ ᴀʟʟᴏᴡᴇᴅ ɪɴ ᴛʜɪs ɢʀᴏᴜᴘ*');
+          reply('⚠️ *Links are not allowed in this group!*');
         }
       }
       
@@ -852,17 +849,17 @@ Commands:
               const dateStr = now.toLocaleDateString('en-PK');
               
               const deleteMessage = `
-╭──❍ *🚫 ᴀɴᴛɪ-ᴅᴇʟᴇᴛᴇ ᴀʟᴇʀᴛ* ❍──╮
+╭──❍ *🚫 ANTI-DELETE ALERT* ❍──╮
 │
-├─❍ *ᴛɪᴍᴇ:* ${timeStr}
-├─❍ *ᴅᴀᴛᴇ:* ${dateStr}
-├─❍ *ᴄʜᴀᴛ ᴛʏᴘᴇ:* ${chatType}${groupNameText}
+├─❍ *Time:* ${timeStr}
+├─❍ *Date:* ${dateStr}
+├─❍ *Chat Type:* ${chatType}${groupNameText}
 │
-├─❍ *ᴅᴇʟᴇᴛᴇᴅ ʙʏ:* @${deletedBy.split('@')[0]}
-├─❍ *ᴏʀɪɢɪɴᴀʟ sᴇɴᴅᴇʀ:* @${originalSender.split('@')[0]}
+├─❍ *Deleted By:* @${deletedBy.split('@')[0]}
+├─❍ *Original Sender:* @${originalSender.split('@')[0]}
 │
-├─❍ *ᴍᴇssᴀɢᴇ ᴛʏᴘᴇ:* ${messageType}
-├─❍ *ᴄᴏɴᴛᴇɴᴛ:* 
+├─❍ *Message Type:* ${messageType}
+├─❍ *Content:* 
 ├─❍ \`${originalContent.substring(0, 500)}${originalContent.length > 500 ? '...' : ''}\`
 │
 ╰──────────────────────❍
