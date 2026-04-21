@@ -78,8 +78,8 @@ if (!fs.existsSync(CREDS)) {
     process.exit(1);
   }
   
-  const decoded = Buffer.from(session.substring(7), 'base64').toString('utf8');
-  JSON.parse(decoded);
+  const decoded = Buffer.from(session.substring(9), 'base64').toString('utf8');
+  try { JSON.parse(decoded); } catch(e) { console.log("❌ Invalid session data"); process.exit(1); }
   
   fs.mkdirSync(AUTH_DIR, { recursive: true });
   fs.writeFileSync(CREDS, decoded, { encoding: 'utf8' });
