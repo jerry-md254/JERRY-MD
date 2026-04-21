@@ -889,5 +889,3 @@ Commands:
 setTimeout(() => {
   connectToWA();
 }, 4000);
-
-// BOT SALLERS KI MKC
