@@ -78,8 +78,8 @@ if (!fs.existsSync(CREDS)) {
     process.exit(1);
   }
   
-  const decoded = Buffer.from(session.substring(9), 'base64').toString('utf8');
-  try { JSON.parse(decoded); } catch(e) { console.log("❌ Invalid session data"); process.exit(1); }
+  const decoded = Buffer.from(session.substring(7), 'base64').toString('utf8');
+  JSON.parse(decoded);
   
   fs.mkdirSync(AUTH_DIR, { recursive: true });
   fs.writeFileSync(CREDS, decoded, { encoding: 'utf8' });
@@ -320,15 +320,17 @@ async function connectToWA() {
       };
       
       for (const participant of participants) {
-        const participantJid = participant.split('@')[0];
-        const pushName = participant.split('@')[0];
+        // participant can be string or object depending on Baileys version
+        const participantStr = typeof participant === 'string' ? participant : (participant.id || participant.jid || String(participant));
+        const participantJid = participantStr.split('@')[0];
+        const pushName = participantStr.split('@')[0];
         
         if (action === 'add') {
           // WELCOME MESSAGE - Only if enabled
           if (settings.welcome) {
             try {
               // Get user's profile picture
-              const ppUrl = await getProfilePicture(sock, participant);
+              const ppUrl = await getProfilePicture(sock, participantStr);
               
               // Format welcome message with variables
               let welcomeText = settings.welcomeMsg || DEFAULT_WELCOME;
@@ -342,12 +344,12 @@ async function connectToWA() {
               await sock.sendMessage(id, {
                 image: { url: ppUrl },
                 caption: welcomeText,
-                mentions: [participant]
+                mentions: [participantStr]
               }).catch(async () => {
                 // Fallback to text if image fails
                 await sock.sendMessage(id, {
                   text: welcomeText,
-                  mentions: [participant]
+                  mentions: [participantStr]
                 });
               });
               
@@ -362,7 +364,7 @@ async function connectToWA() {
           if (settings.goodbye) {
             try {
               // Get user's profile picture
-              const ppUrl = await getProfilePicture(sock, participant).catch(() => 'https://img.sanishtech.com/u/82c5beb887a5952725c5210e28cc6a87.png');
+              const ppUrl = await getProfilePicture(sock, participantStr).catch(() => 'https://img.sanishtech.com/u/82c5beb887a5952725c5210e28cc6a87.png');
               
               // Format goodbye message with variables
               let goodbyeText = settings.goodbyeMsg || DEFAULT_GOODBYE;
@@ -375,12 +377,12 @@ async function connectToWA() {
               await sock.sendMessage(id, {
                 image: { url: ppUrl },
                 caption: goodbyeText,
-                mentions: [participant]
+                mentions: [participantStr]
               }).catch(async () => {
                 // Fallback to text if image fails
                 await sock.sendMessage(id, {
                   text: goodbyeText,
-                  mentions: [participant]
+                  mentions: [participantStr]
                 });
               });
               
