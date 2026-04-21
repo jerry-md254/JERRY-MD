@@ -1,0 +1,21 @@
+{
+  "name": "JERRY-MD",
+  "description": "JERRY-MD WhatsApp bot made by JERRY KING",
+  "logo": "https://img.sanishtech.com/u/82c5beb887a5952725c5210e28cc6a87.png",
+  "keywords": ["bot","JERRY-MD","JERRY-XD"],
+  "success_url": "/",
+
+  "env": {
+    "SESSION_ID": {
+        "description": "Put the JERRY-MD session-id here.",
+        "required": true
+    }
+},
+
+"buildpacks": [
+    {
+        "url": "https://github.com/heroku/heroku-buildpack-nodejs.git"
+    }
+],
+"stack": "heroku-24"
+}
