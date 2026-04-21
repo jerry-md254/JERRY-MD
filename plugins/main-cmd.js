@@ -96,18 +96,26 @@ const vv = await conn.sendMessage( from, {
     caption:aliveText,
     contextInfo
 },{quoted:mek})
-const aliveHandler = async (msgUpdate) => {
-    const msg = msgUpdate.messages[0];
-    if (!msg?.message?.extendedTextMessage) return;
-    if (msg.message.extendedTextMessage.contextInfo?.stanzaId !== vv.key.id) return;
-    conn.ev.off('messages.upsert', aliveHandler);
-    const sel = msg.message.extendedTextMessage.text.trim();
-    if (sel === '1') reply('.menu');
-    else if (sel === '2') reply('.ping');
-    else reply("❌ Invalid option.");
-};
-conn.ev.on('messages.upsert', aliveHandler);
-setTimeout(() => conn.ev.off('messages.upsert', aliveHandler), 5 * 60 * 1000);
+conn.ev.on('messages.upsert', async (msgUpdate) => {
+          const msg = msgUpdate.messages[0];
+          if (!msg.message || !msg.message.extendedTextMessage) return;
+  
+          const selectedOption = msg.message.extendedTextMessage.text.trim();
+  
+          if (msg.message.extendedTextMessage.contextInfo && msg.message.extendedTextMessage.contextInfo.stanzaId === vv.key.id) {
+              switch (selectedOption) {
+                  case '1':
+                      reply('.menu');
+                      break;
+                  case '2':
+                      reply('.ping');
+                      break;
+                      default:
+                          reply("Invalid option. Please select a valid option🔴");
+                  }
+  
+              }
+          });
   
         console.log(`♻ Alive command used in: ${from}`);
       } catch (e) {
@@ -296,25 +304,6 @@ reply(`${e}`)
 }
 })
 //=================================menu=====================================================================
-// Helper: build sub-menu message with channel button
-function buildSubMenu(title, cmds, imgKey, runtime, os, bot) {
-    const commandList = cmds.map(c => `│  ◦ 𝗖𝗠𝗗꞉ *${c.pattern}*`).join('\n');
-    const text = `╔═══❮ 𝙹𝙴𝚁𝚁𝚈-𝙼𝙳 ❯═══╗
-║
-║  🗂️ *${title}*
-║
-╠══════════════════╣
-║  🖥️ ʀᴀᴍ꞉ ${(process.memoryUsage().heapUsed/1024/1024).toFixed(2)}ᴍʙ
-║  ⏱️ ᴜᴘᴛɪᴍᴇ꞉ ${runtime(process.uptime())}
-╠══════════════════╣
-${commandList}
-╠══════════════════╣
-║  📦 ᴛᴏᴛᴀʟ꞉ *${cmds.length} ᴄᴏᴍᴍᴀɴᴅꜱ*
-╚══════════════════╝
-> 𝙹𝙴𝚁𝚁𝚈-𝙼𝙳 ʙʏ 𝙹𝙴𝚁𝚁𝚈 𝙺𝙸𝙽𝙶`;
-    return { text, imgKey };
-}
-
 cmd({
     pattern: "menu",
     alias: ["help"],
@@ -324,132 +313,318 @@ cmd({
 },
 async (conn, mek, m, { from, pushname, reply, contextInfo }) => {
     try {
-        const channelJid = bot.NEWSLETTER; // e.g. "120363406741941705@newsletter"
+        let desc = `
+🤩 *HELLOW* *${pushname}*
+> WELLCOME TO JERRY-MD 🪀
 
-        let desc = `╔═══❮ 𝙹𝙴𝚁𝚁𝚈-𝙼𝙳 ❯═══╗
-║
-║  👋 ʜᴇʟʟᴏ *${pushname}*
-║  🤖 ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ᴊᴇʀʀʏ-ᴍᴅ
-║
-╠══════════════════╣
-║  👤 ᴜsᴇʀ꞉ *${pushname}*
-║  ✒️ ᴘʀᴇꜰɪx꞉ *${config.PREFIX}*
-║  🧬 ᴠᴇʀsɪᴏɴ꞉ *${bot.VERSION}*
-║  ⏱️ ᴜᴘᴛɪᴍᴇ꞉ *${runtime(process.uptime())}*
-║  🖥️ ʀᴀᴍ꞉ *${(process.memoryUsage().heapUsed/1024/1024).toFixed(2)}ᴍʙ*
-╠══════════════════╣
-║
-║  💬 *ʀᴇᴘʟʏ ᴀ ɴᴜᴍʙᴇʀ ʙᴇʟᴏᴡ* 👇
-║
-║  ¹  ◦ 👑 ᴏᴡɴᴇʀ ᴍᴇɴᴜ
-║  ²  ◦ 🔄 ᴄᴏɴᴠᴇʀᴛ ᴍᴇɴᴜ
-║  ³  ◦ 🤖 ᴀɪ ᴍᴇɴᴜ
-║  ⁴  ◦ 🔍 sᴇᴀʀᴄʜ ᴍᴇɴᴜ
-║  ⁵  ◦ 📥 ᴅᴏᴡɴʟᴏᴀᴅ ᴍᴇɴᴜ
-║  ⁶  ◦ 🏠 ᴍᴀɪɴ ᴍᴇɴᴜ
-║  ⁷  ◦ 👥 ɢʀᴏᴜᴘ ᴍᴇɴᴜ
-║  ⁸  ◦ 🎮 ꜰᴜɴ ᴍᴇɴᴜ
-║  ⁹  ◦ 🔧 ᴛᴏᴏʟs ᴍᴇɴᴜ
-║  ¹⁰ ◦ 📦 ᴏᴛʜᴇʀ ᴍᴇɴᴜ
-║  ¹¹ ◦ 🎬 ᴍᴏᴠɪᴇ ᴍᴇɴᴜ
-║  ¹² ◦ 📰 ɴᴇᴡs ᴍᴇɴᴜ
-║  ¹³ ◦ 📚 ᴇᴅᴜᴄᴀᴛɪᴏɴ ᴍᴇɴᴜ
-║
-╚══════════════════╝
-> 𝙹𝙴𝚁𝚁𝚈-𝙼𝙳 ʙʏ 𝙹𝙴𝚁𝚁𝚈 𝙺𝙸𝙽𝙶`;
+╭─「 ꜱᴛᴀᴛᴜꜱ ᴅᴇᴛᴀɪʟꜱ 」
+│👤 *\`User\`*: ${pushname}
+│✒ *\`Prefix\`*: ${config.PREFIX}
+│🧬 *\`Version\`*: ${bot.VERSION}
+│📟 *\`Uptime\`*: ${runtime(process.uptime())}
+│📂 *\`Memory\`*: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${Math.round(os.totalmem() / 1024 / 1024)}MB
+╰──────────●●►
 
+> ʀᴇᴘʟʏ ᴛʜᴇ ɴᴜᴍʙᴇʀ ʙᴇʟᴏᴡ🗿
+
+¹  │❯❯◦ OWNER MENU
+²  │❯❯◦ CONVERT MENU
+³  │❯❯◦ AI MENU
+⁴  │❯❯◦ SEARCH MENU
+⁵  │❯❯◦ DOWNLOAD MENU
+⁶  │❯❯◦ MAIN MENU
+⁷  │❯❯◦ GROUP MENU
+⁸  │❯❯◦ FUN MENU
+⁹  │❯❯◦ TOOLS MENU
+¹⁰ │❯❯◦ OTHER MENU
+¹¹ │❯❯◦ MOVIE MENU
+¹² │❯❯◦ NEWS MENU
+¹³ │❯❯◦ EDUCATION MENU 
+
+${bot.COPYRIGHT}`;
+
+        // Send the menu with an image
         const menuMessage = await conn.sendMessage(from, { 
             image: { url: bot.ALIVE_IMG }, 
-            caption: desc,
-            contextInfo: {
-                ...contextInfo,
-                externalAdReply: {
-                    title: '𝙹𝙴𝚁𝚁𝚈-𝙼𝙳 𝙾𝙵𝙵𝙸𝙲𝙸𝙰𝙻 𝙲𝙷𝙰𝙽𝙽𝙴𝙻',
-                    body: 'ᴊᴏɪɴ ꜰᴏʀ ᴜᴘᴅᴀᴛᴇs & ɴᴇᴡs 🔔',
-                    mediaType: 1,
-                    thumbnail: await (async () => {
-                        try {
-                            const r = await axios.get(bot.ALIVE_IMG, { responseType: 'arraybuffer' });
-                            return Buffer.from(r.data);
-                        } catch { return undefined; }
-                    })(),
-                    renderLargerThumbnail: false,
-                    showAdAttribution: true,
-                    sourceUrl: bot.WA_CHANNEL
-                }
-            }
+            caption: desc, 
+            contextInfo
         }, { quoted: mek });
 
-        // ONE-TIME listener to avoid duplicate slow responses
-        const menuHandler = async (msgUpdate) => {
+        // Listen for the reply
+        conn.ev.on('messages.upsert', async (msgUpdate) => {
             const msg = msgUpdate.messages[0];
-            if (!msg?.message?.extendedTextMessage) return;
-            if (msg.message.extendedTextMessage.contextInfo?.stanzaId !== menuMessage.key.id) return;
-
-            // Remove listener immediately after first match
-            conn.ev.off('messages.upsert', menuHandler);
-
+            if (!msg.message || !msg.message.extendedTextMessage) return;
+            
             const selectedOption = msg.message.extendedTextMessage.text.trim();
-            const catMap = {
-                '1':  { cat: 'owner',     label: '👑 ᴏᴡɴᴇʀ',     img: bot.OWNER_IMG },
-                '2':  { cat: 'convert',   label: '🔄 ᴄᴏɴᴠᴇʀᴛ',   img: bot.CONVERT_IMG },
-                '3':  { cat: 'ai',        label: '🤖 ᴀɪ',         img: bot.AI_IMG },
-                '4':  { cat: 'search',    label: '🔍 sᴇᴀʀᴄʜ',     img: bot.SEARCH_IMG },
-                '5':  { cat: 'download',  label: '📥 ᴅᴏᴡɴʟᴏᴀᴅ',  img: bot.DOWNLOAD_IMG },
-                '6':  { cat: 'main',      label: '🏠 ᴍᴀɪɴ',       img: bot.MAIN_IMG },
-                '7':  { cat: 'group',     label: '👥 ɢʀᴏᴜᴘ',      img: bot.GROUP_IMG },
-                '8':  { cat: 'fun',       label: '🎮 ꜰᴜɴ',        img: bot.FUN_IMG },
-                '9':  { cat: 'tools',     label: '🔧 ᴛᴏᴏʟs',      img: bot.TOOLS_IMG },
-                '10': { cat: 'other',     label: '📦 ᴏᴛʜᴇʀ',      img: bot.OTHER_IMG },
-                '11': { cat: 'movie',     label: '🎬 ᴍᴏᴠɪᴇ',      img: bot.MOVIE_IMG },
-                '12': { cat: 'news',      label: '📰 ɴᴇᴡs',        img: bot.NEWS_IMG },
-                '13': { cat: 'education', label: '📚 ᴇᴅᴜᴄᴀᴛɪᴏɴ',  img: bot.PP_IMG },
-            };
 
-            const entry = catMap[selectedOption];
-            if (!entry) return;
+            // Check if the reply is in response to the menu message
+            if (msg.message.extendedTextMessage.contextInfo?.stanzaId === menuMessage.key.id) {
 
-            const cmds = commands.filter(c => c.category === entry.cat && !c.dontAddCommandList);
-            const commandList = cmds.map(c => `║  ◦ 𝗖𝗠𝗗꞉ *${c.pattern}*`).join('\n');
-            const responseText = `╔═══❮ 𝙹𝙴𝚁𝚁𝚈-𝙼𝙳 ❯═══╗
-║
-║  🗂️ *${entry.label} ᴄᴏᴍᴍᴀɴᴅs*
-║
-╠══════════════════╣
-║  🖥️ ʀᴀᴍ꞉ ${(process.memoryUsage().heapUsed/1024/1024).toFixed(2)}ᴍʙ
-║  ⏱️ ᴜᴘᴛɪᴍᴇ꞉ ${runtime(process.uptime())}
-╠══════════════════╣
+                switch (selectedOption) {
+                    case '1':
+                        {
+                            const ownerCommands = commands.filter(c => c.category === 'owner' && !c.dontAddCommandList);
+                            const commandList = ownerCommands.map(c => `│ • *${c.pattern}*`).join('\n');
+                            const response = `*◈ OWNER COMMAND LIST ◈*
+╭─「 ᴄᴏᴍᴍᴀɴᴅꜱ ᴘᴀɴᴇʟ」
+│◈ *RAM USAGE* - ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${Math.round(os.totalmem() / 1024 / 1024)}MB
+│◈ *RUN TIME* - ${runtime(process.uptime())}
+╰──────────●●►
+╭────────●●►
 ${commandList}
-╠══════════════════╣
-║  📦 ᴛᴏᴛᴀʟ꞉ *${cmds.length} ᴄᴏᴍᴍᴀɴᴅꜱ*
-╚══════════════════╝
-> 𝙹𝙴𝚁𝚁𝚈-𝙼𝙳 ʙʏ 𝙹𝙴𝚁𝚁𝚈 𝙺𝙸𝙽𝙶`;
-
-            await conn.sendMessage(from, {
-                image: { url: entry.img },
-                caption: responseText,
-                contextInfo: {
-                    externalAdReply: {
-                        title: '𝙹𝙴𝚁𝚁𝚈-𝙼𝙳 𝙾𝙵𝙵𝙸𝙲𝙸𝙰𝙻 𝙲𝙷𝙰𝙽𝙽𝙴𝙻',
-                        body: 'ᴊᴏɪɴ ꜰᴏʀ ʟᴀᴛᴇsᴛ ᴜᴘᴅᴀᴛᴇs 🔔',
-                        mediaType: 1,
-                        thumbnail: await (async () => {
-                            try {
-                                const r = await axios.get(entry.img, { responseType: 'arraybuffer' });
-                                return Buffer.from(r.data);
-                            } catch { return undefined; }
-                        })(),
-                        renderLargerThumbnail: false,
-                        showAdAttribution: true,
-                        sourceUrl: bot.WA_CHANNEL
-                    }
+╰────────●●►
+➠ *Total Commands: ${ownerCommands.length}*
+${bot.COPYRIGHT}`;
+                        await conn.sendMessage(from, { 
+                            image: { url: bot.OWNER_IMG }, 
+                            caption: response 
+                        }, { quoted: mek });
+                        }
+                        break;
+                    case '2':
+                        {
+                            const convertCommands = commands.filter(c => c.category === 'convert' && !c.dontAddCommandList);
+                            const commandList = convertCommands.map(c => `│ • *${c.pattern}*`).join('\n');
+                            const response2 = `*◈ CONVERT COMMAND LIST ◈*
+╭─「 ᴄᴏᴍᴍᴀɴᴅꜱ ᴘᴀɴᴇʟ」
+│◈ *RAM USAGE* - ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${Math.round(os.totalmem() / 1024 / 1024)}MB
+│◈ *RUN TIME* - ${runtime(process.uptime())}
+╰──────────●●►
+╭────────●●►
+${commandList}
+╰────────●●►
+➠ *Total Commands: ${convertCommands.length}*
+${bot.COPYRIGHT}`;
+                        await conn.sendMessage(from, { 
+                            image: { url: bot.CONVERT_IMG }, 
+                            caption: response2 
+                        }, { quoted: mek });
+                        }
+                        break;
+                    case '3':
+                        {
+                            const aiCommands = commands.filter(c => c.category === 'ai' && !c.dontAddCommandList);
+                            const commandList = aiCommands.map(c => `│ • *${c.pattern}*`).join('\n');
+                            const response3 = `*◈ AI COMMAND LIST ◈*
+╭─「 ᴄᴏᴍᴍᴀɴᴅꜱ ᴘᴀɴᴇʟ」
+│◈ *RAM USAGE* - ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${Math.round(os.totalmem() / 1024 / 1024)}MB
+│◈ *RUN TIME* - ${runtime(process.uptime())}
+╰──────────●●►
+╭────────●●►
+${commandList}
+╰────────●●►
+➠ *Total Commands: ${aiCommands.length}*
+${bot.COPYRIGHT}`;
+                        await conn.sendMessage(from, { 
+                            image: { url: bot.AI_IMG }, 
+                            caption: response3 
+                        }, { quoted: mek });
+                        }
+                        break;
+                    case '4':
+                        {
+                            const searchCommands = commands.filter(c => c.category === 'search' && !c.dontAddCommandList);
+                            const commandList = searchCommands.map(c => `│ • *${c.pattern}*`).join('\n');
+                            const response4 = `*◈ SEARCH COMMAND LIST ◈*
+╭─「 ᴄᴏᴍᴍᴀɴᴅꜱ ᴘᴀɴᴇʟ」
+│◈ *RAM USAGE* - ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${Math.round(os.totalmem() / 1024 / 1024)}MB
+│◈ *RUN TIME* - ${runtime(process.uptime())}
+╰──────────●●►
+╭────────●●►
+${commandList}
+╰────────●●►
+➠ *Total Commands: ${searchCommands.length}*
+${bot.COPYRIGHT}`;
+                        await conn.sendMessage(from, { 
+                            image: { url: bot.SEARCH_IMG }, 
+                            caption: response4 
+                        }, { quoted: mek });
+                        }
+                        break;
+                    case '5':
+                        {
+                            const downloadCommands = commands.filter(c => c.category === 'download' && !c.dontAddCommandList);
+                            const commandList = downloadCommands.map(c => `│ • *${c.pattern}*`).join('\n');
+                            const response5 = `*◈ DOWNLOAD COMMAND LIST ◈*
+╭─「 ᴄᴏᴍᴍᴀɴᴅꜱ ᴘᴀɴᴇʟ」
+│◈ *RAM USAGE* - ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${Math.round(os.totalmem() / 1024 / 1024)}MB
+│◈ *RUN TIME* - ${runtime(process.uptime())}
+╰──────────●●►
+╭────────●●►
+${commandList}
+╰────────●●►
+➠ *Total Commands: ${downloadCommands.length}*
+${bot.COPYRIGHT}`;
+                        await conn.sendMessage(from, { 
+                            image: { url: bot.DOWNLOAD_IMG }, 
+                            caption: response5 
+                        }, { quoted: mek });
+                        }
+                        break;
+                    case '6':
+                        {
+                            const mainCommands = commands.filter(c => c.category === 'main' && !c.dontAddCommandList);
+                            const commandList = mainCommands.map(c => `│ • *${c.pattern}*`).join('\n');
+                            const response6 = `*◈ MAIN COMMAND LIST ◈*
+╭─「 ᴄᴏᴍᴍᴀɴᴅꜱ ᴘᴀɴᴇʟ」
+│◈ *RAM USAGE* - ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${Math.round(os.totalmem() / 1024 / 1024)}MB
+│◈ *RUN TIME* - ${runtime(process.uptime())}
+╰──────────●●►
+╭────────●●►
+${commandList}
+╰────────●●►
+➠ *Total Commands: ${mainCommands.length}*
+${bot.COPYRIGHT}`;
+                        await conn.sendMessage(from, { 
+                            image: { url: bot.MAIN_IMG }, 
+                            caption: response6 
+                        }, { quoted: mek });
+                        }
+                        break;
+                    case '7':
+                        {
+                            const groupCommands = commands.filter(c => c.category === 'group' && !c.dontAddCommandList);
+                            const commandList = groupCommands.map(c => `│ • *${c.pattern}*`).join('\n');
+                            const response7 = `*◈ GROUP COMMAND LIST ◈*
+╭─「 ᴄᴏᴍᴍᴀɴᴅꜱ ᴘᴀɴᴇʟ」
+│◈ *RAM USAGE* - ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${Math.round(os.totalmem() / 1024 / 1024)}MB
+│◈ *RUN TIME* - ${runtime(process.uptime())}
+╰──────────●●►
+╭────────●●►
+${commandList}
+╰────────●●►
+➠ *Total Commands: ${groupCommands.length}*
+${bot.COPYRIGHT}`;
+                        await conn.sendMessage(from, { 
+                            image: { url: bot.GROUP_IMG }, 
+                            caption: response7 
+                        }, { quoted: mek });
+                        }
+                        break;
+                    case '8':
+                        {
+                            const funCommands = commands.filter(c => c.category === 'fun' && !c.dontAddCommandList);
+                            const commandList = funCommands.map(c => `│ • *${c.pattern}*`).join('\n');
+                            const response8 = `*◈ FUN COMMAND LIST ◈*
+╭─「 ᴄᴏᴍᴍᴀɴᴅꜱ ᴘᴀɴᴇʟ」
+│◈ *RAM USAGE* - ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${Math.round(os.totalmem() / 1024 / 1024)}MB
+│◈ *RUN TIME* - ${runtime(process.uptime())}
+╰──────────●●►
+╭────────●●►
+${commandList}
+╰────────●●►
+➠ *Total Commands: ${funCommands.length}*
+${bot.COPYRIGHT}`;
+                        await conn.sendMessage(from, { 
+                            image: { url: bot.FUN_IMG }, 
+                            caption: response8 
+                        }, { quoted: mek });
+                        }
+                        break;
+                    case '9':
+                        {
+                            const toolsCommands = commands.filter(c => c.category === 'tools' && !c.dontAddCommandList);
+                            const commandList = toolsCommands.map(c => `│ • *${c.pattern}*`).join('\n');
+                            const response9 = `*◈ TOOLS COMMAND LIST ◈*
+╭─「 ᴄᴏᴍᴍᴀɴᴅꜱ ᴘᴀɴᴇʟ」
+│◈ *RAM USAGE* - ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${Math.round(os.totalmem() / 1024 / 1024)}MB
+│◈ *RUN TIME* - ${runtime(process.uptime())}
+╰──────────●●►
+╭────────●●►
+${commandList}
+╰────────●●►
+➠ *Total Commands: ${toolsCommands.length}*
+${bot.COPYRIGHT}`;
+                        await conn.sendMessage(from, { 
+                            image: { url: bot.TOOLS_IMG }, 
+                            caption: response9 
+                        }, { quoted: mek });
+                        }
+                        break;
+                    case '10':
+                        {
+                            const otherCommands = commands.filter(c => c.category === 'other' && !c.dontAddCommandList);
+                            const commandList = otherCommands.map(c => `│ • *${c.pattern}*`).join('\n');
+                            const response10 = `*◈ OTHER COMMAND LIST ◈*
+╭─「 ᴄᴏᴍᴍᴀɴᴅꜱ ᴘᴀɴᴇʟ」
+│◈ *RAM USAGE* - ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${Math.round(os.totalmem() / 1024 / 1024)}MB
+│◈ *RUN TIME* - ${runtime(process.uptime())}
+╰──────────●●►
+╭────────●●►
+${commandList}
+╰────────●●►
+➠ *Total Commands: ${otherCommands.length}*
+${bot.COPYRIGHT}`;
+                        await conn.sendMessage(from, { 
+                            image: { url: bot.OTHER_IMG }, 
+                            caption: response10 
+                        }, { quoted: mek });
+                        }
+                        break;
+                        case '11':
+                        {
+                            const movieCommands = commands.filter(c => c.category === 'movie' && !c.dontAddCommandList);
+                            const commandList = movieCommands.map(c => `│ • *${c.pattern}*`).join('\n');
+                            const response11 = `*◈ MOVIE COMMAND LIST ◈*
+╭─「 ᴄᴏᴍᴍᴀɴᴅꜱ ᴘᴀɴᴇʟ」
+│◈ *RAM USAGE* - ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${Math.round(os.totalmem() / 1024 / 1024)}MB
+│◈ *RUN TIME* - ${runtime(process.uptime())}
+╰──────────●●►
+╭────────●●►
+${commandList}
+╰────────●●►
+➠ *Total Commands: ${movieCommands.length}*
+${bot.COPYRIGHT}`;
+                        await conn.sendMessage(from, { 
+                            image: { url: bot.MOVIE_IMG }, 
+                            caption: response11 
+                        }, { quoted: mek });
+                        }
+                        break;
+                        case '12':
+                        {
+                            const newsCommands = commands.filter(c => c.category === 'news' && !c.dontAddCommandList);
+                            const commandList = newsCommands.map(c => `│ • *${c.pattern}*`).join('\n');
+                            const response12 = `*◈ NEWS COMMAND LIST ◈*
+╭─「 ᴄᴏᴍᴍᴀɴᴅꜱ ᴘᴀɴᴇʟ」
+│◈ *RAM USAGE* - ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${Math.round(os.totalmem() / 1024 / 1024)}MB
+│◈ *RUN TIME* - ${runtime(process.uptime())}
+╰──────────●●►
+╭────────●●►
+${commandList}
+╰────────●●►
+➠ *Total Commands: ${newsCommands.length}*
+${bot.COPYRIGHT}`;
+                        await conn.sendMessage(from, { 
+                            image: { url: bot.NEWS_IMG }, 
+                            caption: response12 
+                        }, { quoted: mek });
+                        }
+                        break;
+                        case '13':
+                        {
+                            const ppCommands = commands.filter(c => c.category === 'education' && !c.dontAddCommandList);
+                            const commandList = ppCommands.map(c => `│ • *${c.pattern}*`).join('\n');
+                            const response13 = `*◈ EDUCATION COMMAND LIST ◈*
+╭─「 ᴄᴏᴍᴍᴀɴᴅꜱ ᴘᴀɴᴇʟ」
+│◈ *RAM USAGE* - ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${Math.round(os.totalmem() / 1024 / 1024)}MB
+│◈ *RUN TIME* - ${runtime(process.uptime())}
+╰──────────●●►
+╭────────●●►
+${commandList}
+╰────────●●►
+➠ *Total Commands: ${ppCommands.length}*
+${bot.COPYRIGHT}`;
+                        await conn.sendMessage(from, { 
+                            image: { url: bot.PP_IMG }, 
+                            caption: response13 
+                        }, { quoted: mek });
+                        }
+                        break;
+                    default:
                 }
-            }, { quoted: mek });
-        };
-
-        conn.ev.on('messages.upsert', menuHandler);
-        // Auto-remove listener after 5 minutes to prevent memory leak
-        setTimeout(() => conn.ev.off('messages.upsert', menuHandler), 5 * 60 * 1000);
+            }
+        });
 
     } catch (e) {
         console.error(e);
@@ -470,7 +645,7 @@ async (conn, mek, m, { from }) => {
     try {
         // Owner's contact info
         const ownerNumber = '+22870437628'; // Replace this with the actual owner number
-        const ownerName = 'JERRY XD'; // Replace this with the owner's name
+        const ownerName = 'JERRY KING'; // Replace this with the owner's name
         const organization = 'JERRY CODERS'; // Optional: replace with the owner's organization
 
         // Create a vCard (contact card) for the owner
@@ -546,7 +721,7 @@ cmd({
 *|* ⚡ ᴍꜱ: 0ms
 *|* 🔁 ᴛᴇꜱᴛɪɴɢ...
 ╰━━━━━━━━━━━━━━━━━━⊷
-> ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴊᴇʀʀʏ-xᴅ` 
+> ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴊᴇʀʀʏ-ᴍᴅ` 
     }, { quoted: m });
     
     // 🔄 UPDATE INTERVAL
@@ -565,7 +740,7 @@ cmd({
   elapsedTime < 10 ? " 📡 ᴍᴇᴀꜱᴜʀɪɴɢ..." : 
   elapsedTime < 15 ? " ⚡ ᴄᴀʟᴄᴜʟᴀᴛɪɴɢ..." : 
   elapsedTime < 20 ? " 📊 ᴀɴᴀʟʏᴢɪɴɢ..." : 
-  " ✅ ★彡[ᴄᴏᴍᴘʟᴇᴛᴇ ɪɴ]彡★ " + (30 - elapsedTime) + "s"}\n╰━━━━━━━━━━━━━━━━━━⊷\n> ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴊᴇʀʀʏ-xᴅ`;
+  " ✅ ★彡[ᴄᴏᴍᴘʟᴇᴛᴇ ɪɴ]彡★ " + (30 - elapsedTime) + "s"}\n╰━━━━━━━━━━━━━━━━━━⊷\n> ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴊᴇʀʀʏ-ᴍᴅ`;
       
       try {
         await conn.sendMessage(from, {
@@ -595,7 +770,7 @@ cmd({
 *|* 📊 αѵɠ ɱร: ${avgPing}ms
 ╰━━━━━━━━━━━━━━━━━━⊷
 
-> ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴊᴇʀʀʏ-xᴅ
+> ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴊᴇʀʀʏ-ᴍᴅ
 ${avgPing < 100 ? " 🚀 µℓƭ૨α ƒαรƭ" : 
   avgPing < 200 ? " ⚡ εא૮εℓℓεɳƭ" : 
   avgPing < 500 ? " 🔄 ɠσσ∂" : 
@@ -837,34 +1012,83 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
 ┗━━━━━━━━━━━━━━━━━━┛`
         }, { quoted: mek });
         console.log(`♻ Setting Command Used : ${from}`);
-        const settingsHandler = async (msgUpdate) => {
+        conn.ev.on('messages.upsert', async (msgUpdate) => {
             const msg = msgUpdate.messages[0];
-            if (!msg?.message?.extendedTextMessage) return;
-            if (msg.message.extendedTextMessage.contextInfo?.stanzaId !== vv.key.id) return;
-            conn.ev.off('messages.upsert', settingsHandler);
-            if (!isOwner) return;
-            const sel = msg.message.extendedTextMessage.text.trim();
-            const actions = {
-                '1.1': () => { reply('.update MODE:public'); reply('.restart'); },
-                '1.2': () => { reply('.update MODE:private'); reply('.restart'); },
-                '1.3': () => { reply('.update MODE:groups'); reply('.restart'); },
-                '1.4': () => { reply('.update MODE:inbox'); reply('.restart'); },
-                '2.1': () => reply('.update AUTO_VOICE:true'),
-                '2.2': () => reply('.update AUTO_VOICE:false'),
-                '3.1': () => reply('.update AUTO_READ_STATUS:true'),
-                '3.2': () => reply('.update AUTO_READ_STATUS:false'),
-                '4.1': () => { reply('.update AUTO_REACT:true'); reply('.restart'); },
-                '4.2': () => { reply('.update AUTO_REACT:false'); reply('.restart'); },
-                '5.1': () => reply('.update AUTO_TYPING:true'),
-                '5.2': () => reply('.update AUTO_TYPING:false'),
-                '6':   () => reply('.setautobio'),
-                '7':   () => reply('.sprikynews'),
-            };
-            if (actions[sel]) actions[sel]();
-            else reply("\u274c Invalid option.");
-        };
-        conn.ev.on('messages.upsert', settingsHandler);
-        setTimeout(() => conn.ev.off('messages.upsert', settingsHandler), 5 * 60 * 1000);
+            if (!msg.message || !msg.message.extendedTextMessage) return;
+
+            const selectedOption = msg.message.extendedTextMessage.text.trim();
+
+            if (msg.message.extendedTextMessage.contextInfo && msg.message.extendedTextMessage.contextInfo.stanzaId === vv.key.id) {
+                switch (selectedOption) {
+                    case '1.1':
+                        if (!isOwner) return;
+                        reply('.update MODE:public');
+                        reply('.restart');
+                        break;
+                    case '1.2':
+                        if (!isOwner) return;
+                        reply('.update MODE:private');
+                        reply('.restart');
+                        break;
+                    case '1.3':
+                        if (!isOwner) return;
+                        reply('.update MODE:groups');
+                        reply('.restart');
+                        break;
+                    case '1.4':
+                        if (!isOwner) return;
+                        reply('.update MODE:inbox');
+                        reply('.restart');
+                        break;
+                    case '2.1':
+                        if (!isOwner) return;
+                        reply('.update AUTO_VOICE:true');
+                        break;
+                    case '2.2':
+                        if (!isOwner) return;
+                        reply('.update AUTO_VOICE:false');
+                        break;
+                    case '3.1':
+                        if (!isOwner) return;
+                        reply('.update AUTO_READ_STATUS:true');
+                        break;
+                    case '3.2':
+                        if (!isOwner) return;
+                        reply('.update AUTO_READ_STATUS:false');
+                        break;
+                    case '4.1':
+                        if (!isOwner) return;
+                        reply('.update AUTO_REACT:true');
+                        reply('.restart');
+                        break;
+                    case '4.2':
+                        if (!isOwner) return;
+                        reply('.update AUTO_REACT:false');
+                        reply('.restart');
+                        break;
+                    case '5.1':
+                        if (!isOwner) return;
+                        reply('.update AUTO_TYPING:true');
+                        break;
+                    case '5.2':
+                        if (!isOwner) return;
+                        reply('.update AUTO_TYPING:false');
+                        break;
+                    case '6':
+                        if (!isOwner) return;
+                        reply('.setautobio');
+                        break;    
+                    case '7':
+                        if (!isOwner) return;
+                        reply('.sprikynews');
+                        break;    
+                        sprikynes
+                    default:
+                        reply("Invalid option. Please select a valid option🔴");
+                }
+
+            }
+        });
     
     } catch (e) {
         console.log(e);
