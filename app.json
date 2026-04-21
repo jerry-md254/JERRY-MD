@@ -1,8 +1,8 @@
 {
   "name": "JERRY-MD",
-  "description": "JERRY-MD WhatsApp bot made by JERRY KING",
-  "logo": "https://img.sanishtech.com/u/82c5beb887a5952725c5210e28cc6a87.png",
-  "keywords": ["bot","JERRY-MD","JERRY-XD"],
+  "description": "JERRY-MD WhatsApp bot made by Jerry King",
+  "logo": "https://img.sanishtech.com/u/359a0de954640fca09ecbe9dbfd3ad80.png",
+  "keywords": ["bot","JERRY-MD","JERRY-MD"],
   "success_url": "/",
 
   "env": {
